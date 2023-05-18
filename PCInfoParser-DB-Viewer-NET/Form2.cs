@@ -12,15 +12,22 @@ namespace PCInfoParser_DB_Viewer_NET
 {
     public partial class Form2 : Form
     {
+        string error = "";
         public Form2(string error)
         {
-            SetError(error);
+            this.error = error;
             InitializeComponent();
         }
 
         private void Form2_Load(object sender, EventArgs e)
         {
-
+            label1.Text = error;
         }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
     }
 }

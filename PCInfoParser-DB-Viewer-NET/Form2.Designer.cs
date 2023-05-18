@@ -6,7 +6,6 @@ namespace PCInfoParser_DB_Viewer_NET
 {
     partial class Form2
     {
-        string error = "123";
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -32,52 +31,45 @@ namespace PCInfoParser_DB_Viewer_NET
         /// the contents of this method with the code editor.
         /// </summary>
         /// 
-        private void SetError(string error)
-        {
-            this.error = error;
-        }
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
         private void InitializeComponent()
         {
-            button1 = new Button();
-            label1 = new Label();
-            SuspendLayout();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new Point(191, 77); // координата, в.
-            button1.Name = "button1"; // имя button1
-            button1.Size = new Size(127, 32); // Размер будет, пикс
-            button1.TabIndex = 1; // для дальнейшего использования
-            button1.Text = "OK";
-            button1.UseVisualStyleBackColor = true; // стандартный цвет, используется по-умолчанию
-            button1.Click += new System.EventHandler(this.Button1_Click);
+            this.button1.Location = new System.Drawing.Point(164, 67);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(109, 28);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "OK";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
             // label1
             // 
-            label1.Location = new Point(12, 9);
-            label1.Name = "label1";
-            label1.RightToLeft = RightToLeft.No;
-            label1.Size = new Size(491, 65);
-            label1.TabIndex = 0;
-            label1.Text = this.error;
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            this.label1.Location = new System.Drawing.Point(10, 8);
+            this.label1.Name = "label1";
+            this.label1.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.label1.Size = new System.Drawing.Size(421, 56);
+            this.label1.TabIndex = 0;
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form2
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(515, 121);
-            Controls.Add(label1);
-            Controls.Add(button1);
-            FormBorderStyle = FormBorderStyle.Fixed3D;
-            MaximizeBox = false;
-            Name = "Form2";
-            Text = "Error";
-            ResumeLayout(false);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(441, 105);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.button1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
+            this.Name = "Form2";
+            this.Text = "Error";
+            this.Load += new System.EventHandler(this.Form2_Load);
+            this.ResumeLayout(false);
+
         }
 
         #endregion

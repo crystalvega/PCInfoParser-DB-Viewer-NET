@@ -3,11 +3,10 @@ using MySql.Data.MySqlClient;
 using OfficeOpenXml;
 using System.IO;
 using System;
-using PCInfoParser_DB_Viewer_NET;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PCInfoParser_DB_Viewer
+namespace PCInfoParser_DB_Viewer_NET
 {
     public class ExcelExporter
     {
@@ -19,13 +18,13 @@ namespace PCInfoParser_DB_Viewer
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            //var folderBrowserDialog = new FolderBrowserDialog();
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Title = "Сохранить файл как...";
-            saveFileDialog1.Filter = "Таблица Excel (*.xlsx)|*.xlsx";
-            saveFileDialog1.InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath);
-            saveFileDialog1.FileName = fileName;
-            //DialogResult result = folderBrowserDialog.ShowDialog();
+            SaveFileDialog saveFileDialog1 = new()
+            {
+                Title = "Сохранить файл как...",
+                Filter = "Таблица Excel (*.xlsx)|*.xlsx",
+                InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath),
+                FileName = fileName
+            };
 
             DialogResult result = saveFileDialog1.ShowDialog();
 
@@ -40,29 +39,24 @@ namespace PCInfoParser_DB_Viewer
                 return;// пользователь отменил диалоговое окно
             }
 
-            // Собираем полный путь к файлу
-            //var filePath = Path.Combine(folderBrowserDialog.SelectedPath, fileName);
-
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
             }
 
-            using (var package = new ExcelPackage(filePath))
-            {
-                // создаем первую таблицу
-                var sheet1 = package.Workbook.Worksheets.Add(sheet1Name);
-                AddHeaders(sheet1, headers1);
-                AddData(sheet1, data1);
+            using var package = new ExcelPackage(filePath);
+            // создаем первую таблицу
+            var sheet1 = package.Workbook.Worksheets.Add(sheet1Name);
+            AddHeaders(sheet1, headers1);
+            AddData(sheet1, data1);
 
-                // создаем вторую таблицу
-                var sheet2 = package.Workbook.Worksheets.Add(sheet2Name);
-                AddHeaders(sheet2, headers2);
-                AddData(sheet2, data2);
+            // создаем вторую таблицу
+            var sheet2 = package.Workbook.Worksheets.Add(sheet2Name);
+            AddHeaders(sheet2, headers2);
+            AddData(sheet2, data2);
 
-                // сохраняем файл
-                package.Save();
-            }
+            // сохраняем файл
+            package.Save();
         }
 
         private void AddHeaders(ExcelWorksheet sheet, string[] headers)
@@ -89,144 +83,199 @@ namespace PCInfoParser_DB_Viewer
         }
     }
 
-    public class Config
+    public class IniFile
     {
-        private Dictionary<string, string> values = new Dictionary<string, string>();
+        private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
+        private readonly string fileName;
 
-        public Config(string filename)
+        public IniFile(string fileName)
         {
-            if (!File.Exists(filename))
+            this.fileName = fileName;
+
+            if (File.Exists(fileName))
             {
-                SetValue("mysql_host", "localhost");
-                SetValue("mysql_port", "3306");
-                SetValue("mysql_user", "root");
-                SetValue("mysql_password", "Не задано");
-                Save(filename);
+                Load();
             }
-            Load(filename);
+            else
+            {
+                SetValue("MySQL", "IP", "127.0.0.1");
+                SetValue("MySQL", "Port", "3306");
+                SetValue("MySQL", "Database", "");
+                SetValue("MySQL", "User", "");
+                SetValue("MySQL", "Password", "");
+                SetValue("Server", "Port", "");
+                SetValue("Server", "Password", "");
+                SetValue("App", "Minimaze", "false");
+                SetValue("App", "ConnectMySQL", "false");
+                SetValue("App", "ServerStart", "false");
+                Save();
+            }
         }
 
-        public void Load(string filename)
+        public string GetValue(string section, string key)
         {
-            using (var reader = new StreamReader(filename))
+            if (data.TryGetValue(section, out Dictionary<string, string> sectionData))
             {
-                bool error = false;
-                string errorstr = "Укажите ";
-                while (!reader.EndOfStream)
+                if (sectionData.TryGetValue(key, out string value))
                 {
-                    var line = reader.ReadLine().Trim();
-                    if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line))
-                        continue;
-                    var parts = line.Split(new char[] { '=' }, 2);
-                    if (parts.Length == 2)
+                    return value;
+                }
+            }
+
+            return null;
+        }
+
+        public void SetValue(string section, string key, string value)
+        {
+            if (!data.TryGetValue(section, out Dictionary<string, string> sectionData))
+            {
+                sectionData = new Dictionary<string, string>();
+                data[section] = sectionData;
+            }
+
+            sectionData[key] = value;
+        }
+
+        public void Load()
+        {
+            data.Clear();
+
+            string currentSection = null;
+
+            foreach (string line in File.ReadAllLines(fileName))
+            {
+                string trimmedLine = line.Trim();
+                if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]"))
+                {
+                    currentSection = trimmedLine.Substring(1, trimmedLine.Length - 2);
+                    if (!data.ContainsKey(currentSection))
                     {
-                        var key = parts[0].Trim();
-                        var value = parts[1].Trim();
-                        if (value == "Не задано")
-                        {
-                            errorstr = errorstr + key + ", ";
-                            error = true;
-                        }
-                        values[key] = value;
+                        data[currentSection] = new Dictionary<string, string>();
                     }
                 }
-                if (error == true)
+                else if (!string.IsNullOrEmpty(trimmedLine))
                 {
-                    errorstr = errorstr[..^2] + " в dbviewer.cfg.";
-                    Application.Run(new Form2(errorstr));
-                    Environment.Exit(1);
+                    string[] parts = trimmedLine.Split(new char[] { '=' }, 2);
+                    if (parts.Length > 1)
+                    {
+                        string currentKey = parts[0].Trim();
+                        string currentValue = parts[1].Trim();
+                        if (data.TryGetValue(currentSection, out Dictionary<string, string> sectionData))
+                        {
+                            sectionData[currentKey] = currentValue;
+                        }
+                    }
                 }
             }
         }
 
-        public void Save(string filename)
+        public void Save()
         {
-            using (var writer = new StreamWriter(filename))
+            List<string> lines = new();
+            foreach (KeyValuePair<string, Dictionary<string, string>> section in data)
             {
-                foreach (var kvp in values)
+                lines.Add("[" + section.Key + "]");
+                foreach (KeyValuePair<string, string> keyValuePair in section.Value)
                 {
-                    writer.WriteLine("{0} = {1}", kvp.Key, kvp.Value);
+                    lines.Add(keyValuePair.Key + "=" + keyValuePair.Value);
                 }
+                lines.Add("");
             }
-        }
 
-        public string GetValue(string key, string defaultValue = "")
-        {
-            if (values.ContainsKey(key))
-                return values[key];
-            return defaultValue;
-        }
-
-        public void SetValue(string key, string value)
-        {
-            values[key] = value;
+            File.WriteAllLines(fileName, lines.ToArray());
         }
     }
 
     public class MySQLConnect
     {
         private MySqlConnection connection;
-        private string server;
-        private string port;
-        private string uid;
-        private string password;
+        private readonly IniFile ini;
+        private string connectionString;
+        bool connection_status;
 
-        public MySQLConnect(string server, string port, string uid, string password)
+        public MySQLConnect(IniFile ini)
         {
-            this.server = server;
-            this.port = port;
-            this.uid = uid;
-            this.password = password;
-
-            Initialize();
+            this.ini = ini;
         }
 
-        private void Initialize()
+        public bool Connect()
         {
-            string connectionString = $"server={server};port={port};uid={uid};password={password};";
-            connection = new MySqlConnection(connectionString);
-        }
-
-        public bool OpenConnection()
-        {
+            connectionString = $"Server={ini.GetValue("MySQL", "IP")};Port={ini.GetValue("MySQL", "Port")};Database={ini.GetValue("MySQL", "Database")};Uid={ini.GetValue("MySQL", "User")};Pwd={ini.GetValue("MySQL", "Password")};";
+            connection_status = false;
             try
             {
+                connection = new(connectionString);
                 connection.Open();
-                return true;
+                connection_status = true;
             }
-            catch (MySqlException ex)
+            catch (Exception ex)
             {
-                // Handle exception
-                return false;
+                Console.WriteLine(ex.Message);
             }
-            catch (InvalidOperationException ex)
-            {
-                return true;
-            }
+            return connection_status;
         }
-
-        public bool CloseConnection()
+        public string LastID(string table)
         {
+            string query = $"SELECT ID FROM {table}_General"; // Замените на ваш запрос SELECT
+
             try
             {
-                connection.Close();
-                return true;
+                MySqlCommand command = new MySqlCommand(query, connection);
+                MySqlDataReader reader = command.ExecuteReader();
+
+                List<int> columnValues = new();
+
+
+                while (reader.Read())
+                {
+                    string columnValue = reader.GetString(0); // Получение значения столбца по индексу (0)
+                    columnValues.Add(Convert.ToInt32(columnValue));
+                }
+
+                columnValues = columnValues.Distinct().ToList();
+                columnValues.Sort();
+
+                int lastvalue = 0;
+
+                foreach (int value in columnValues)
+                {
+                    lastvalue++;
+                    if (value != lastvalue - 1)
+                    {
+                        lastvalue--;
+                        break;
+                    }
+                }
+
+                reader.Close();
+                return lastvalue.ToString();
+            }
+            catch (Exception)
+            {
+                return "0";
+            }
+        }
+        public void Disconnect()
+        {
+            if (!connection_status) connection.Close();
+        }
+        public bool ExecuteCommand(string commandText)
+        {
+            bool success = false;
+            try
+            {
+                MySqlCommand command = new(commandText, connection);
+                int rowsAffected = command.ExecuteNonQuery();
+
+                // Если хотя бы одна строка была затронута, считаем операцию успешной
+                success = rowsAffected > 0;
             }
             catch (MySqlException ex)
             {
-                // Handle exception
-                return false;
+                // Обработка ошибок подключения к базе данных
+                if (ex.ErrorCode != -2147467259) Console.WriteLine($"An error occurred: {ex.Message}");
             }
-        }
-
-        public void ExecuteQuery(string query)
-        {
-            if (OpenConnection() == true)
-            {
-                MySqlCommand cmd = new MySqlCommand(query, connection);
-                cmd.ExecuteNonQuery();
-                CloseConnection();
-            }
+            return success;
         }
         private string DateReverse(string date)
         {
@@ -236,7 +285,7 @@ namespace PCInfoParser_DB_Viewer
         }
         public string[,] ParseTables(string database, string table, string ymd)
         {
-            if (OpenConnection() == true)
+            if (connection_status == true)
             {
                 ymd = DateReverse(ymd);
                 MySqlCommand cmd = new MySqlCommand($"SELECT * FROM `{database}`.`{table}` WHERE `Дата создания` BETWEEN '{ymd} 00:00:00' AND '{ymd} 23:59:59'", connection);
@@ -275,8 +324,8 @@ namespace PCInfoParser_DB_Viewer
         }
         public List<string> ParseTime(string table, string database)
         {
-            List<string> result = new List<string>() { "" };
-            if (OpenConnection() == true)
+            List<string> result = new() { "" };
+            if (connection_status == true)
             {
                 MySqlCommand cmd = new MySqlCommand($"SELECT `Дата создания` FROM `{database}`.`{table}`", connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
@@ -298,11 +347,11 @@ namespace PCInfoParser_DB_Viewer
 
         public List<string> GetDatabases()
         {
-            List<string> result = new List<string>() { "" };
+            List<string> result = new() { "" };
 
-            if (OpenConnection() == true)
+            if (connection_status == true)
             {
-                MySqlCommand cmd = new MySqlCommand("SHOW DATABASES", connection);
+                MySqlCommand cmd = new("SHOW DATABASES", connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
 
                 while (dataReader.Read())
@@ -329,17 +378,26 @@ namespace PCInfoParser_DB_Viewer
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static int Main()
+        static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            var config = new Config("dbviewer.cfg");
-            MySQLConnect dbview = new MySQLConnect(config.GetValue("mysql_host"), config.GetValue("mysql_port"), config.GetValue("mysql_user"), config.GetValue("mysql_password"));
-            List<string> databases = dbview.GetDatabases();
-            Application.Run(new Form1(databases, dbview));
-            return 0;
+            IniFile ini = new("PCInfoParser-Server.ini");
+            MySQLConnect dbview = new(ini);
+            if (dbview.Connect())
+            {
+                List<string> databases = dbview.GetDatabases();
+                Application.Run(new Form1(databases, dbview));
+            }
+            else
+            {
+                Error("Не удалось подключиться к MySQL! Проверьте настройки.");
+            }
+        }
+        static void Error(string errorstr)
+        {
+            Application.Run(new Form2(errorstr));
+            Environment.Exit(1);
         }
     }
 }

@@ -1,12 +1,5 @@
-﻿using PCInfoParser_DB_Viewer;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PCInfoParser_DB_Viewer_NET
@@ -16,8 +9,6 @@ namespace PCInfoParser_DB_Viewer_NET
         List<string> generalList = new List<string>() { "Кабинет", "LAN", "ФИО", "Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
         List<string> diskList = new List<string>() { "Кабинет", "LAN", "ФИО", "Диск", "Наименование", "Прошивка", "Размер", "Время работы", "Включён", "Состояние", "Температура", "Дата создания" };
         List<string> databases = new List<string>();
-        private System.Windows.Forms.Timer tooltipTimer = new System.Windows.Forms.Timer();
-        private ListViewItem lastItem;
         string database;
         string[,] general;
         string[,] disk;
@@ -71,6 +62,11 @@ namespace PCInfoParser_DB_Viewer_NET
                 this.disk = dbview.ParseTables(this.database, "disk configuration", datetime);
                 Button1_click(sender, e);
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            comboBox1.DataSource = databases;
         }
 
         private void inputListView(string[,] table)

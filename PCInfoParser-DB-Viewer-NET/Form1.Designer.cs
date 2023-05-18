@@ -32,118 +32,120 @@ namespace PCInfoParser_DB_Viewer_NET
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            comboBox1 = new ComboBox();
-            comboBox2 = new ComboBox();
-            button1 = new Button();
-            button2 = new Button();
-            button3 = new Button();
-            listView1 = new ListView();
-            splitContainer1 = new SplitContainer();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
-            splitContainer1.Panel2.SuspendLayout();
-            splitContainer1.SuspendLayout();
-            SuspendLayout();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.listView1 = new System.Windows.Forms.ListView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            this.SuspendLayout();
             // 
             // comboBox1
             // 
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(12, 12);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(761, 23);
-            comboBox1.TabIndex = 0;
-            comboBox1.DataSource = databases;
-            comboBox1.SelectedIndexChanged += Combobox1_SelectedIndexChanged;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(10, 10);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(653, 21);
+            this.comboBox1.TabIndex = 0;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.Combobox1_SelectedIndexChanged);
             // 
             // comboBox2
             // 
-            comboBox2.FormattingEnabled = true;
-            comboBox2.Location = new Point(12, 41);
-            comboBox2.Name = "comboBox2";
-            comboBox2.Size = new Size(761, 23);
-            comboBox2.TabIndex = 1;
-            comboBox2.Enabled = false;
-            comboBox2.SelectedIndexChanged += Combobox2_SelectedIndexChanged;
+            this.comboBox2.Enabled = false;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Location = new System.Drawing.Point(10, 36);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(653, 21);
+            this.comboBox2.TabIndex = 1;
+            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.Combobox2_SelectedIndexChanged);
             // 
             // button1
             // 
-            button1.Location = new Point(-12, -8);
-            button1.Name = "button1";
-            button1.Size = new Size(401, 42);
-            button1.TabIndex = 3;
-            button1.Text = "Общие характеристики";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += Button1_click;
-            button1.Enabled = false;
+            this.button1.Enabled = false;
+            this.button1.Location = new System.Drawing.Point(-10, -7);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(344, 36);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "Общие характеристики";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.Button1_click);
             // 
             // button2
             // 
-            button2.Location = new Point(-10, -8);
-            button2.Name = "button2";
-            button2.Size = new Size(401, 42);
-            button2.TabIndex = 4;
-            button2.Text = "S.M.A.R.T.";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += Button2_click;
-            button2.Enabled = false;
+            this.button2.Enabled = false;
+            this.button2.Location = new System.Drawing.Point(-9, -7);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(344, 36);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "S.M.A.R.T.";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.Button2_click);
             // 
             // button3
             // 
-            button3.Location = new Point(12, 555);
-            button3.Name = "button3";
-            button3.Size = new Size(761, 23);
-            button3.TabIndex = 6;
-            button3.Text = "Сохранить в XLSX";
-            button3.UseVisualStyleBackColor = true;
-            button3.Click += Button3_click;
-            button3.Enabled = false;
+            this.button3.Enabled = false;
+            this.button3.Location = new System.Drawing.Point(10, 481);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(652, 20);
+            this.button3.TabIndex = 6;
+            this.button3.Text = "Сохранить в XLSX";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.Button3_click);
             // 
             // listView1
             // 
-            listView1.Location = new Point(12, 99);
-            listView1.Name = "listView1";
-            listView1.Size = new Size(761, 450);
-            listView1.TabIndex = 2;
-            listView1.UseCompatibleStateImageBehavior = false;
-            listView1.View = View.Details;
-            listView1.FullRowSelect = true;
-            listView1.Enabled = false;
+            this.listView1.Enabled = false;
+            this.listView1.FullRowSelect = true;
+            this.listView1.HideSelection = false;
+            this.listView1.Location = new System.Drawing.Point(10, 86);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(653, 391);
+            this.listView1.TabIndex = 2;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
             // 
             // splitContainer1
             // 
-            splitContainer1.Location = new Point(12, 70);
-            splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Location = new System.Drawing.Point(10, 61);
+            this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(button1);
+            this.splitContainer1.Panel1.Controls.Add(this.button1);
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(button2);
-            splitContainer1.Size = new Size(761, 23);
-            splitContainer1.SplitterDistance = 377;
-            splitContainer1.TabIndex = 7;
+            this.splitContainer1.Panel2.Controls.Add(this.button2);
+            this.splitContainer1.Size = new System.Drawing.Size(652, 20);
+            this.splitContainer1.SplitterDistance = 322;
+            this.splitContainer1.SplitterWidth = 3;
+            this.splitContainer1.TabIndex = 7;
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(785, 590);
-            Controls.Add(splitContainer1);
-            Controls.Add(listView1);
-            Controls.Add(button3);
-            Controls.Add(comboBox2);
-            Controls.Add(comboBox1);
-            FormBorderStyle = FormBorderStyle.Fixed3D;
-            Name = "Form1";
-            Text = "PCInfoParser DB Viewer";
-            splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
-            splitContainer1.ResumeLayout(false);
-            ResumeLayout(false);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(673, 511);
+            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.listView1);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.comboBox2);
+            this.Controls.Add(this.comboBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.Name = "Form1";
+            this.Text = "PCInfoParser DB Viewer";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
