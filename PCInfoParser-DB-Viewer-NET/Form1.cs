@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySqlX.XDevAPI.Relational;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -6,18 +7,18 @@ namespace PCInfoParser_DB_Viewer_NET
 {
     public partial class Form1 : Form
     {
-        List<string> generalList = new List<string>() { "Кабинет", "LAN", "ФИО", "Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
-        List<string> diskList = new List<string>() { "Кабинет", "LAN", "ФИО", "Диск", "Наименование", "Прошивка", "Размер", "Время работы", "Включён", "Состояние", "Температура", "Дата создания" };
-        List<string> databases = new List<string>();
-        string database;
+        List<string> generalList = new List<string>() {"Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
+        List<string> diskList = new() {"Диск", "Наименование", "Прошивка", "Размер", "Время работы", "Включён", "Состояние", "Температура", "Дата создания" };
+        List<string> userList = new() { "ID", "Кабинет", "LAN", "ФИО" };
+        string organization;
         string[,] general;
         string[,] disk;
+        string[,] users;
         string datetime;
-        MySQLConnect dbview;
+        readonly MySQLConnect dbview;
 
-        public Form1(List<string> databases, MySQLConnect dbview)
+        public Form1(MySQLConnect dbview)
         {
-            this.databases = databases;
             this.dbview = dbview;
             InitializeComponent();
         }
@@ -28,18 +29,21 @@ namespace PCInfoParser_DB_Viewer_NET
             {
                 comboBox2.Enabled = false;
                 comboBox2.SelectedIndex = -1;
-                button1.Enabled = false;
-                button2.Enabled = false;
                 button3.Enabled = false;
                 listView1.Columns.Clear();
                 listView1.Enabled = false;
+                listView2.Columns.Clear();
+                listView2.Enabled = false;
 
             }
             else
             {
                 comboBox2.Enabled = true;
-                this.database = comboBox1.Text;
-                comboBox2.DataSource = dbview.ParseTime("all configuration", database);
+                listView2.Enabled = true;
+                organization = comboBox1.Text;
+                users = dbview.ParseTables("Users", organization);
+                UsersInput();
+                //comboBox2.DataSource = dbview.ParseTime("General", table);
 
             }
         }
@@ -47,8 +51,6 @@ namespace PCInfoParser_DB_Viewer_NET
         {
             if (comboBox2.Text == "")
             {
-                button1.Enabled = false;
-                button2.Enabled = false;
                 button3.Enabled = false;
                 listView1.Columns.Clear();
                 listView1.Enabled = false;
@@ -58,36 +60,31 @@ namespace PCInfoParser_DB_Viewer_NET
                 listView1.Enabled = true;
                 button3.Enabled = true;
                 datetime = comboBox2.Text;
-                this.general = dbview.ParseTables(this.database, "all configuration", datetime);
-                this.disk = dbview.ParseTables(this.database, "disk configuration", datetime);
-                Button1_click(sender, e);
+                GeneralInput();
             }
         }
         
         private void Form1_Load(object sender, EventArgs e)
         {
-            comboBox1.DataSource = databases; 
+            comboBox1.DataSource = dbview.GetTables();
+            comboBox3.DataSource = new List<string>() { "Выбрать характеристики...", "Общие характеристики", "S.M.A.R.T." };
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            comboBox1.DataSource = databases;
-        }
 
-        private void inputListView(string[,] table)
+        private void inputListView2(string[,] table)
         {
             for (int i = 0; i < table.GetLength(0); i++)
             {
-                ListViewItem item = new ListViewItem(table[i, 0]);
+                ListViewItem item = new(table[i, 0]);
                 for (int j = 1; j < table.GetLength(1); j++)
                     item.SubItems.Add(table[i, j]);
-                listView1.Items.Add(item);
+                listView2.Items.Add(item);
             }
-            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listView2.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
             int minColumnWidth = 120;
             int maxColumnWidth = 400;
-            foreach (ColumnHeader column in listView1.Columns)
+            foreach (ColumnHeader column in listView2.Columns)
             {
                 column.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
                 if (column.Width < minColumnWidth)
@@ -100,29 +97,83 @@ namespace PCInfoParser_DB_Viewer_NET
                 }
             }
         }
-        private void Button1_click(object sender, EventArgs e)
+
+        private void inputListView1(string[,] table, string[] columns)
         {
-            listView1.Columns.Clear();
-            listView1.Items.Clear();
-            button1.Enabled = false;
-            button2.Enabled = true;
-            generalList.ForEach(name => listView1.Columns.Add(name));
-            inputListView(this.general);
+            for (int i = 0; i < columns.Length; i++)
+            {
+                ListViewItem item = new(columns[i]);
+                item.SubItems.Add(table[0, i]);
+                listView1.Items.Add(item);
+            }
+            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            foreach (ColumnHeader column in listView1.Columns)
+            {
+                column.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+            }
         }
-        private void Button2_click(object sender, EventArgs e)
+
+        private void UsersInput()
+        {
+            listView2.Columns.Clear();
+            listView2.Items.Clear();
+            listView2.Columns.Add("ID");
+            listView2.Columns.Add("Кабинет");
+            listView2.Columns.Add("LAN");
+            listView2.Columns.Add("ФИО");
+            inputListView2(this.users);
+        }
+            private void GeneralInput()
         {
             listView1.Columns.Clear();
             listView1.Items.Clear();
-            button2.Enabled = false;
-            button1.Enabled = true;
-            diskList.ForEach(name => listView1.Columns.Add(name));
-            inputListView(this.disk);
+            listView1.Columns.Add("Элемент");
+            listView1.Columns.Add("Значение");
+            inputListView1(this.general, generalList.ToArray());
+            
+        }
+        private void DiskInput()
+        {
+            listView1.Columns.Clear();
+            listView1.Items.Clear();
+            listView1.Columns.Add("Элемент");
+            listView1.Columns.Add("Значение");
+            inputListView1(this.disk, diskList.ToArray());
         }
         private void Button3_click(object sender, EventArgs e)
         {
-            string filePath = $"{this.database} {this.datetime}.xlsx";
+            string filePath = $"{this.organization} {this.datetime}.xlsx";
             ExcelExporter xlsxFile = new ExcelExporter();
             xlsxFile.ExportToExcel(filePath, "Общие характеристики", "S.M.A.R.T.", this.general, this.disk);
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox3.Text == "Выбрать характеристики...")
+            {
+
+            }
+            else if (comboBox3.Text == "Общие характеристики")
+            {
+                GeneralInput();
+            }
+            else if (comboBox3.Text == "S.M.A.R.T.")
+            {
+                DiskInput();
+            }
+        }
+
+        private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void ListView2_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            string id = listView2.SelectedItems[0].Text;
+            string[] time = dbview.ParseTime("General", organization, id).ToArray();
+            this.general = dbview.ParseTables("General", organization, time[time.Length-1]);
+            this.disk = dbview.ParseTables("Disk", organization, time[time.Length - 1]);
         }
     }
 }

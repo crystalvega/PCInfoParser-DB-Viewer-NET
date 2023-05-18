@@ -283,16 +283,21 @@ namespace PCInfoParser_DB_Viewer_NET
             string dateReversed = dateSplit[2] + "-" + dateSplit[1] + "-" + dateSplit[0];
             return dateReversed;
         }
-        public string[,] ParseTables(string database, string table, string ymd)
+        public string[,] ParseTables(string table, string organization, string ymd = "")
         {
             if (connection_status == true)
             {
-                ymd = DateReverse(ymd);
-                MySqlCommand cmd = new MySqlCommand($"SELECT * FROM `{database}`.`{table}` WHERE `Дата создания` BETWEEN '{ymd} 00:00:00' AND '{ymd} 23:59:59'", connection);
+                MySqlCommand cmd;
+                if (ymd == "") cmd = new($"SELECT * FROM `{organization}_{table}`", connection);
+                else
+                {
+                    ymd = DateReverse(ymd);
+                    cmd = new($"SELECT * FROM `{organization}_{table}` WHERE `Дата создания` BETWEEN '{ymd} 00:00:00' AND '{ymd} 23:59:59'", connection);
+                }
                 MySqlDataReader dataReader = cmd.ExecuteReader();
 
                 int numCols = dataReader.FieldCount;
-                List<string[]> rows = new List<string[]>();
+                List<string[]> rows = new();
 
                 while (dataReader.Read())
                 {
@@ -322,12 +327,12 @@ namespace PCInfoParser_DB_Viewer_NET
                 return null;
             }
         }
-        public List<string> ParseTime(string table, string database)
+        public List<string> ParseTime(string table, string organization, string id)
         {
             List<string> result = new() { "" };
             if (connection_status == true)
             {
-                MySqlCommand cmd = new MySqlCommand($"SELECT `Дата создания` FROM `{database}`.`{table}`", connection);
+                MySqlCommand cmd = new MySqlCommand($"SELECT `Дата создания` FROM `{organization}_{table}` WHERE `ID` like {id}", connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
                 {
@@ -345,22 +350,23 @@ namespace PCInfoParser_DB_Viewer_NET
             }
         }
 
-        public List<string> GetDatabases()
+        public List<string> GetTables()
         {
             List<string> result = new() { "" };
 
             if (connection_status == true)
             {
-                MySqlCommand cmd = new("SHOW DATABASES", connection);
+                MySqlCommand cmd = new("SHOW TABLES", connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
+                string database = ini.GetValue("MySQL", "Database");
 
                 while (dataReader.Read())
                 {
-                    string databaseName = dataReader["Database"].ToString();
+                    string tableName = dataReader[$"Tables_in_{database}"].ToString();
 
-                    if (!databaseName.StartsWith("mysql") && !databaseName.StartsWith("information_schema") && !databaseName.StartsWith("performance_schema") && !databaseName.StartsWith("sys"))
+                    if (tableName.EndsWith("_users"))
                     {
-                        result.Add(databaseName);
+                        result.Add(tableName.Replace("_users", ""));
                     }
                 }
 
@@ -384,15 +390,8 @@ namespace PCInfoParser_DB_Viewer_NET
             Application.SetCompatibleTextRenderingDefault(false);
             IniFile ini = new("PCInfoParser-Server.ini");
             MySQLConnect dbview = new(ini);
-            if (dbview.Connect())
-            {
-                List<string> databases = dbview.GetDatabases();
-                Application.Run(new Form1(databases, dbview));
-            }
-            else
-            {
-                Error("Не удалось подключиться к MySQL! Проверьте настройки.");
-            }
+            if (dbview.Connect()) Application.Run(new Form1(dbview));
+            else Error("Не удалось подключиться к MySQL! Проверьте настройки.");
         }
         static void Error(string errorstr)
         {
