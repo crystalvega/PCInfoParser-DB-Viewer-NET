@@ -277,7 +277,7 @@ namespace PCInfoParser_DB_Viewer_NET
             }
             return success;
         }
-        private string DateReverse(string date)
+    private string DateReverse(string date)
         {
             string[] dateSplit = date.Split('.');
             string dateReversed = dateSplit[2] + "-" + dateSplit[1] + "-" + dateSplit[0];

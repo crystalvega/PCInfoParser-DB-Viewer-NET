@@ -63,6 +63,11 @@ namespace PCInfoParser_DB_Viewer_NET
                 Button1_click(sender, e);
             }
         }
+        
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            comboBox1.DataSource = databases; 
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
