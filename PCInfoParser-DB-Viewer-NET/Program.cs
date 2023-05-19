@@ -10,10 +10,10 @@ namespace PCInfoParser_DB_Viewer_NET
 {
     public class ExcelExporter
     {
-        public void ExportToExcel(string fileName, string sheet1Name, string sheet2Name, string[,] data1, string[,] data2)
+        public void ExportToExcel(string organization, string sheet1Name, string sheet2Name, MySQLConnect connect)
         {
-            string[] headers1 = new string[] { "Кабинет", "LAN", "ФИО", "Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
-            string[] headers2 = new string[] { "Кабинет", "LAN", "ФИО", "Диск", "Наименование", "Прошивка", "Размер", "Время работы", "Включён", "Состояние", "Температура", "Дата создания" };
+            string[] headers1 = new string[] { "ID", "Кабинет", "LAN", "ФИО", "Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
+            string[] headers2 = new string[] { "ID", "Кабинет", "LAN", "ФИО", "Диск", "Наименование", "Прошивка", "Размер", "Время работы", "Включён", "Состояние", "Температура", "Дата создания" };
             string filePath;
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -23,7 +23,7 @@ namespace PCInfoParser_DB_Viewer_NET
                 Title = "Сохранить файл как...",
                 Filter = "Таблица Excel (*.xlsx)|*.xlsx",
                 InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath),
-                FileName = fileName
+                FileName = organization + ".xlsx"
             };
 
             DialogResult result = saveFileDialog1.ShowDialog();
@@ -45,15 +45,49 @@ namespace PCInfoParser_DB_Viewer_NET
             }
 
             using var package = new ExcelPackage(filePath);
+
+            string[,] users = connect.ParseTables("Users", organization);
+            string[,] data1wousers = connect.ParseTables("General", organization);
+            string[,] data2wousers = connect.ParseTables("Disk", organization);
+
+            for (int i=0; i < data1wousers.GetLength(0); i++)
+            {
+                for (int i2 = 0; i2 < users.GetLength(0); i2++)
+                {
+                    if (users[i2,0] == data1wousers[i, 0])
+                    {
+                        for(int i3 = 0; i3<4; i3++)
+                        {
+                            data1wousers[i, i3] = users[i2, i3];
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < data2wousers.GetLength(0); i++)
+            {
+                for (int i2 = 0; i2 < users.GetLength(0); i2++)
+                {
+                    if (users[i2, 0] == data2wousers[i, 0])
+                    {
+                        for (int i3 = 0; i3 < 4; i3++)
+                        {
+                            data2wousers[i, i3] = users[i2, i3];
+                        }
+                    }
+                }
+            }
             // создаем первую таблицу
             var sheet1 = package.Workbook.Worksheets.Add(sheet1Name);
             AddHeaders(sheet1, headers1);
-            AddData(sheet1, data1);
+
+            AddData(sheet1, data1wousers);
 
             // создаем вторую таблицу
             var sheet2 = package.Workbook.Worksheets.Add(sheet2Name);
             AddHeaders(sheet2, headers2);
-            AddData(sheet2, data2);
+            
+            AddData(sheet2, data2wousers);
 
             // сохраняем файл
             package.Save();
@@ -283,17 +317,50 @@ namespace PCInfoParser_DB_Viewer_NET
             string dateReversed = dateSplit[2] + "-" + dateSplit[1] + "-" + dateSplit[0];
             return dateReversed;
         }
-        public string[,] ParseTables(string table, string organization, string ymd = "")
+        public string[,] ParseTables(string table, string organization, string ymd)
         {
             if (connection_status == true)
             {
-                MySqlCommand cmd;
-                if (ymd == "") cmd = new($"SELECT * FROM `{organization}_{table}`", connection);
-                else
+                ymd = DateReverse(ymd);
+                MySqlCommand cmd = new($"SELECT * FROM `{organization}_{table}` WHERE `Дата создания` BETWEEN '{ymd} 00:00:00' AND '{ymd} 23:59:59'", connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                int numCols = dataReader.FieldCount;
+                List<string[]> rows = new();
+
+                while (dataReader.Read())
                 {
-                    ymd = DateReverse(ymd);
-                    cmd = new($"SELECT * FROM `{organization}_{table}` WHERE `Дата создания` BETWEEN '{ymd} 00:00:00' AND '{ymd} 23:59:59'", connection);
+                    string[] row = new string[numCols];
+                    for (int i = 1; i < numCols; i++)
+                    {
+                         row[i-1] = dataReader[i].ToString();
+                    }
+                    rows.Add(row);  
                 }
+
+                dataReader.Close();
+
+                string[,] result = new string[rows.Count, numCols];
+
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    for (int j = 0; j < numCols; j++)
+                    {
+                        result[i, j] = rows[i][j];
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public string[,] ParseTables(string table, string organization)
+        {
+            if (connection_status == true)
+            {
+                MySqlCommand cmd = new($"SELECT * FROM `{organization}_{table}`", connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
 
                 int numCols = dataReader.FieldCount;
@@ -329,7 +396,7 @@ namespace PCInfoParser_DB_Viewer_NET
         }
         public List<string> ParseTime(string table, string organization, string id)
         {
-            List<string> result = new() { "" };
+            List<string> result = new();
             if (connection_status == true)
             {
                 MySqlCommand cmd = new MySqlCommand($"SELECT `Дата создания` FROM `{organization}_{table}` WHERE `ID` like {id}", connection);

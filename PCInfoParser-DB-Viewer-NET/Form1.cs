@@ -29,6 +29,8 @@ namespace PCInfoParser_DB_Viewer_NET
             {
                 comboBox2.Enabled = false;
                 comboBox2.SelectedIndex = -1;
+                comboBox3.Enabled = false;
+                comboBox3.SelectedIndex = -1;
                 button3.Enabled = false;
                 listView1.Columns.Clear();
                 listView1.Enabled = false;
@@ -38,6 +40,7 @@ namespace PCInfoParser_DB_Viewer_NET
             }
             else
             {
+                button3.Enabled = true;
                 comboBox2.Enabled = true;
                 listView2.Enabled = true;
                 organization = comboBox1.Text;
@@ -49,25 +52,23 @@ namespace PCInfoParser_DB_Viewer_NET
         }
         private void Combobox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox2.Text == "")
+            if (comboBox2.Text == "" || comboBox2.Text == "Выбрать дату...")
             {
-                button3.Enabled = false;
-                listView1.Columns.Clear();
-                listView1.Enabled = false;
             }
             else
             {
                 listView1.Enabled = true;
                 button3.Enabled = true;
                 datetime = comboBox2.Text;
-                GeneralInput();
+                comboBox3_SelectedIndexChanged(sender, e);
+                //GeneralInput();
             }
         }
         
         private void Form1_Load(object sender, EventArgs e)
         {
             comboBox1.DataSource = dbview.GetTables();
-            comboBox3.DataSource = new List<string>() { "Выбрать характеристики...", "Общие характеристики", "S.M.A.R.T." };
+            comboBox3.DataSource = new List<string>() { "Выбрать характеристики..." };
         }
 
 
@@ -82,8 +83,8 @@ namespace PCInfoParser_DB_Viewer_NET
             }
             listView2.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
-            int minColumnWidth = 120;
-            int maxColumnWidth = 400;
+            int minColumnWidth = 60;
+            int maxColumnWidth = 120;
             foreach (ColumnHeader column in listView2.Columns)
             {
                 column.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -127,6 +128,7 @@ namespace PCInfoParser_DB_Viewer_NET
         {
             listView1.Columns.Clear();
             listView1.Items.Clear();
+            this.general = dbview.ParseTables("General", organization, datetime);
             listView1.Columns.Add("Элемент");
             listView1.Columns.Add("Значение");
             inputListView1(this.general, generalList.ToArray());
@@ -136,6 +138,7 @@ namespace PCInfoParser_DB_Viewer_NET
         {
             listView1.Columns.Clear();
             listView1.Items.Clear();
+            this.disk = dbview.ParseTables("Disk", organization, datetime);
             listView1.Columns.Add("Элемент");
             listView1.Columns.Add("Значение");
             inputListView1(this.disk, diskList.ToArray());
@@ -144,12 +147,12 @@ namespace PCInfoParser_DB_Viewer_NET
         {
             string filePath = $"{this.organization} {this.datetime}.xlsx";
             ExcelExporter xlsxFile = new ExcelExporter();
-            xlsxFile.ExportToExcel(filePath, "Общие характеристики", "S.M.A.R.T.", this.general, this.disk);
+            xlsxFile.ExportToExcel(organization, "Общие характеристики", "S.M.A.R.T.", dbview);
         }
 
         private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox3.Text == "Выбрать характеристики...")
+            if (comboBox3.Text == "Выбрать характеристики..." || comboBox3.Text == "")
             {
 
             }
@@ -163,17 +166,19 @@ namespace PCInfoParser_DB_Viewer_NET
             }
         }
 
-        private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void ListView2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            comboBox2.Enabled = true;
+            comboBox3.Enabled = true;
+            listView1.Enabled = true;
             string id = listView2.SelectedItems[0].Text;
             string[] time = dbview.ParseTime("General", organization, id).ToArray();
-            this.general = dbview.ParseTables("General", organization, time[time.Length-1]);
-            this.disk = dbview.ParseTables("Disk", organization, time[time.Length - 1]);
+            datetime = time[^1];
+            comboBox3.DataSource = new List<string>() { "Общие характеристики", "S.M.A.R.T." };
+            comboBox3_SelectedIndexChanged(sender, e);
+            comboBox2.DataSource = time;
+            comboBox2.Text = "Выбрать дату...";
+            groupBox1.Text = $"Пользователь ID {id}";
         }
     }
 }

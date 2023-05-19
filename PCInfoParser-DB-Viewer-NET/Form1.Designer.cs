@@ -32,6 +32,7 @@ namespace PCInfoParser_DB_Viewer_NET
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
@@ -56,7 +57,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(10, 10);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(637, 21);
+            this.comboBox1.Size = new System.Drawing.Size(821, 21);
             this.comboBox1.TabIndex = 0;
             this.comboBox1.Text = "Выбрать организацию...";
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.Combobox1_SelectedIndexChanged);
@@ -69,7 +70,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Location = new System.Drawing.Point(6, 389);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(403, 21);
+            this.comboBox2.Size = new System.Drawing.Size(518, 21);
             this.comboBox2.TabIndex = 1;
             this.comboBox2.Text = "Выбрать дату...";
             this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.Combobox2_SelectedIndexChanged);
@@ -81,7 +82,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.button3.FlatAppearance.BorderSize = 0;
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button3.Image = global::PCInfoParser_DB_Viewer_NET.Properties.Resources.diskette2;
-            this.button3.Location = new System.Drawing.Point(653, 10);
+            this.button3.Location = new System.Drawing.Point(837, 10);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(21, 21);
             this.button3.TabIndex = 6;
@@ -99,7 +100,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(6, 46);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(403, 337);
+            this.listView1.Size = new System.Drawing.Size(518, 337);
             this.listView1.TabIndex = 2;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -114,7 +115,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.groupBox1.Controls.Add(this.comboBox2);
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(415, 416);
+            this.groupBox1.Size = new System.Drawing.Size(530, 416);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Пользователь {client_id}";
@@ -127,7 +128,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.comboBox3.FormattingEnabled = true;
             this.comboBox3.Location = new System.Drawing.Point(6, 19);
             this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(403, 21);
+            this.comboBox3.Size = new System.Drawing.Size(518, 21);
             this.comboBox3.TabIndex = 3;
             this.comboBox3.Text = "Выбрать характеристики...";
             this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox3_SelectedIndexChanged);
@@ -140,7 +141,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.groupBox2.Controls.Add(this.listView2);
             this.groupBox2.Location = new System.Drawing.Point(-2, 0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(247, 416);
+            this.groupBox2.Size = new System.Drawing.Size(316, 416);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Пользователи";
@@ -157,7 +158,7 @@ namespace PCInfoParser_DB_Viewer_NET
             this.listView2.Location = new System.Drawing.Point(6, 19);
             this.listView2.MultiSelect = false;
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(235, 391);
+            this.listView2.Size = new System.Drawing.Size(304, 391);
             this.listView2.TabIndex = 3;
             this.listView2.UseCompatibleStateImageBehavior = false;
             this.listView2.View = System.Windows.Forms.View.Details;
@@ -178,19 +179,19 @@ namespace PCInfoParser_DB_Viewer_NET
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.groupBox2);
-            this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint);
-            this.splitContainer1.Size = new System.Drawing.Size(664, 416);
-            this.splitContainer1.SplitterDistance = 415;
+            this.splitContainer1.Size = new System.Drawing.Size(848, 416);
+            this.splitContainer1.SplitterDistance = 530;
             this.splitContainer1.TabIndex = 10;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(684, 465);
+            this.ClientSize = new System.Drawing.Size(868, 465);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.comboBox1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(500, 300);
             this.Name = "Form1";
             this.Text = "PCInfoParser DB Viewer";

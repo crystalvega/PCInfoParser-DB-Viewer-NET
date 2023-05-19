@@ -62,7 +62,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -117,7 +117,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="PCInfoParser-DB-Viewer-NET_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -152,8 +151,17 @@
     <PackageReference Include="EPPlus">
       <Version>6.2.4</Version>
     </PackageReference>
+    <PackageReference Include="EPPlus.Interfaces">
+      <Version>6.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="EPPlus.System.Drawing">
+      <Version>6.1.1</Version>
+    </PackageReference>
     <PackageReference Include="IndexRange">
       <Version>1.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream">
+      <Version>2.3.2</Version>
     </PackageReference>
     <PackageReference Include="MySql.Data">
       <Version>8.0.33</Version>
@@ -164,9 +172,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="diskette2.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="diskette.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
