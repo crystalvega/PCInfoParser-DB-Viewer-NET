@@ -60,12 +60,28 @@ namespace PCInfoParser_DB_Viewer_NET
                 listView1.Enabled = true;
                 button3.Enabled = true;
                 datetime = comboBox2.Text;
-                comboBox3_SelectedIndexChanged(sender, e);
+                //comboBox3_SelectedIndexChanged(sender, e);
                 //GeneralInput();
             }
         }
-        
-        private void Form1_Load(object sender, EventArgs e)
+
+		private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (comboBox3.Text == "Выбрать характеристики..." || comboBox3.Text == "")
+			{
+
+			}
+			else if (comboBox3.Text == "Общие характеристики")
+			{
+				GeneralInput();
+			}
+			else if (comboBox3.Text == "S.M.A.R.T.")
+			{
+				DiskInput();
+			}
+		}
+
+		private void Form1_Load(object sender, EventArgs e)
         {
             comboBox1.DataSource = dbview.GetTables();
             comboBox3.DataSource = new List<string>() { "Выбрать характеристики..." };
@@ -145,40 +161,26 @@ namespace PCInfoParser_DB_Viewer_NET
         }
         private void Button3_click(object sender, EventArgs e)
         {
-            string filePath = $"{this.organization} {this.datetime}.xlsx";
             ExcelExporter xlsxFile = new ExcelExporter();
             xlsxFile.ExportToExcel(organization, "Общие характеристики", "S.M.A.R.T.", dbview);
         }
 
-        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (comboBox3.Text == "Выбрать характеристики..." || comboBox3.Text == "")
-            {
-
-            }
-            else if (comboBox3.Text == "Общие характеристики")
-            {
-                GeneralInput();
-            }
-            else if (comboBox3.Text == "S.M.A.R.T.")
-            {
-                DiskInput();
-            }
-        }
-
         private void ListView2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            comboBox2.Enabled = true;
+            if (listView2.SelectedItems[0].Text != "")
+            { 
+			comboBox2.Enabled = true;
             comboBox3.Enabled = true;
             listView1.Enabled = true;
             string id = listView2.SelectedItems[0].Text;
             string[] time = dbview.ParseTime("General", organization, id).ToArray();
             datetime = time[^1];
-            comboBox3.DataSource = new List<string>() { "Общие характеристики", "S.M.A.R.T." };
-            comboBox3_SelectedIndexChanged(sender, e);
+            if (comboBox3.Text != "Общие характеристики" && comboBox3.Text != "S.M.A.R.T." )
+                comboBox3.DataSource = new List<string>() { "Общие характеристики", "S.M.A.R.T." };
             comboBox2.DataSource = time;
             comboBox2.Text = "Выбрать дату...";
             groupBox1.Text = $"Пользователь ID {id}";
-        }
+			}
+		}
     }
 }

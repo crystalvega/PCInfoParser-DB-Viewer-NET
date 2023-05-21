@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PCInfoParser_DB_Viewer_NET
 {
@@ -47,32 +48,32 @@ namespace PCInfoParser_DB_Viewer_NET
             using var package = new ExcelPackage(filePath);
 
             string[,] users = connect.ParseTables("Users", organization);
-            string[,] data1wousers = connect.ParseTables("General", organization);
-            string[,] data2wousers = connect.ParseTables("Disk", organization);
+			string[,] data1raw = connect.ParseTablesExport("General", organization);
+			string[,] data2raw = connect.ParseTablesExport("Disk", organization);
 
-            for (int i=0; i < data1wousers.GetLength(0); i++)
+            for (int i=0; i < data1raw.GetLength(0); i++)
             {
                 for (int i2 = 0; i2 < users.GetLength(0); i2++)
                 {
-                    if (users[i2,0] == data1wousers[i, 0])
+                    if (users[i2,0] == data1raw[i, 0])
                     {
                         for(int i3 = 0; i3<4; i3++)
                         {
-                            data1wousers[i, i3] = users[i2, i3];
+                            data1raw[i, i3] = users[i2, i3];
                         }
                     }
                 }
             }
 
-            for (int i = 0; i < data2wousers.GetLength(0); i++)
+            for (int i = 0; i < data2raw.GetLength(0); i++)
             {
                 for (int i2 = 0; i2 < users.GetLength(0); i2++)
                 {
-                    if (users[i2, 0] == data2wousers[i, 0])
+                    if (users[i2, 0] == data2raw[i, 0])
                     {
                         for (int i3 = 0; i3 < 4; i3++)
                         {
-                            data2wousers[i, i3] = users[i2, i3];
+                            data2raw[i, i3] = users[i2, i3];
                         }
                     }
                 }
@@ -81,13 +82,13 @@ namespace PCInfoParser_DB_Viewer_NET
             var sheet1 = package.Workbook.Worksheets.Add(sheet1Name);
             AddHeaders(sheet1, headers1);
 
-            AddData(sheet1, data1wousers);
+            AddData(sheet1, data1raw);
 
             // создаем вторую таблицу
             var sheet2 = package.Workbook.Worksheets.Add(sheet2Name);
             AddHeaders(sheet2, headers2);
             
-            AddData(sheet2, data2wousers);
+            AddData(sheet2, data2raw);
 
             // сохраняем файл
             package.Save();
@@ -382,7 +383,7 @@ namespace PCInfoParser_DB_Viewer_NET
 
                 for (int i = 0; i < rows.Count; i++)
                 {
-                    for (int j = 0; j < numCols; j++)
+					for (int j = 0; j < numCols; j++)
                     {
                         result[i, j] = rows[i][j];
                     }
@@ -394,7 +395,46 @@ namespace PCInfoParser_DB_Viewer_NET
                 return null;
             }
         }
-        public List<string> ParseTime(string table, string organization, string id)
+		public string[,] ParseTablesExport(string table, string organization)
+		{
+			if (connection_status == true)
+			{
+				MySqlCommand cmd = new($"SELECT * FROM `{organization}_{table}`", connection);
+				MySqlDataReader dataReader = cmd.ExecuteReader();
+
+				int numCols = dataReader.FieldCount;
+				List<string[]> rows = new();
+
+				while (dataReader.Read())
+				{
+					string[] row = new string[numCols];
+					for (int i = 0; i < numCols; i++)
+					{
+						row[i] = dataReader[i].ToString();
+					}
+					rows.Add(row);
+				}
+
+				dataReader.Close();
+
+				string[,] result = new string[rows.Count, numCols + 3];
+
+				for (int i = 0; i < rows.Count; i++)
+				{
+					result[i, 0] = rows[i][0];
+					for (int j = 1; j < numCols; j++)
+					{
+						result[i, j + 3] = rows[i][j];
+					}
+				}
+				return result;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		public List<string> ParseTime(string table, string organization, string id)
         {
             List<string> result = new();
             if (connection_status == true)
@@ -447,23 +487,33 @@ namespace PCInfoParser_DB_Viewer_NET
 
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+		static bool IsProcessOpen(string processName)
+		{
+			Process[] processes = Process.GetProcessesByName(processName);
+			return processes.Length > 1;
+		}
+		/// <summary>
+		///  The main entry point for the application.
+		/// </summary>
+		[STAThread]
+        static int Main()
         {
-            Application.EnableVisualStyles();
+			if (IsProcessOpen("PCInfoParser-DB-Viewer-NET"))
+			{
+				MessageBox.Show("Приложение уже открыто!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return 1;
+			}
+			Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             IniFile ini = new("PCInfoParser-Server.ini");
             MySQLConnect dbview = new(ini);
             if (dbview.Connect()) Application.Run(new Form1(dbview));
-            else Error("Не удалось подключиться к MySQL! Проверьте настройки.");
-        }
-        static void Error(string errorstr)
-        {
-            Application.Run(new Form2(errorstr));
-            Environment.Exit(1);
+            else
+            {
+                MessageBox.Show("Не удалось подключиться к MySQL! Проверьте настройки.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 2;
+            }
+            return 0;
         }
     }
 }
