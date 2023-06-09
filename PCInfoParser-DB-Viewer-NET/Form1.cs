@@ -7,7 +7,7 @@ namespace PCInfoParser_DB_Viewer_NET
 {
     public partial class Form1 : Form
     {
-        List<string> generalList = new List<string>() {"Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
+        List<string> generalList = new List<string>() {"Монитор", "Диагональ", "Тип принтера", "Модель принтера", "ПК", "Материнская плата", "Процессор", "Частота процессора", "Баллы Passmark", "Дата выпуска", "Температура процессора", "Тип ОЗУ", "ОЗУ, 1 Планка", "ОЗУ, 2 Планка", "ОЗУ, 3 Планка", "ОЗУ, 4 Планка", "Сокет", "Диск 1", "Состояние диска 1", "Диск 2", "Состояние диска 2", "Диск 3", "Состояние диска 3", "Диск 4", "Состояние диска 4", "Операционная система", "Антивирус", "CPU Под замену", "Все CPU под сокет", "Дата создания" };
         List<string> diskList = new() {"Диск", "Наименование", "Прошивка", "Размер", "Время работы", "Включён", "Состояние", "Температура", "Дата создания" };
         List<string> userList = new() { "ID", "Кабинет", "LAN", "ФИО" };
         string organization;
@@ -60,8 +60,7 @@ namespace PCInfoParser_DB_Viewer_NET
                 listView1.Enabled = true;
                 button3.Enabled = true;
                 datetime = comboBox2.Text;
-                //comboBox3_SelectedIndexChanged(sender, e);
-                //GeneralInput();
+                comboBox3_SelectedIndexChanged(sender, e);
             }
         }
 
@@ -85,6 +84,16 @@ namespace PCInfoParser_DB_Viewer_NET
         {
             comboBox1.DataSource = dbview.GetTables();
             comboBox3.DataSource = new List<string>() { "Выбрать характеристики..." };
+
+            this.listView1
+                .GetType()
+                .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(listView1, true, null);
+
+            this.listView2
+                .GetType()
+                .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(listView2, true, null);
         }
 
 
